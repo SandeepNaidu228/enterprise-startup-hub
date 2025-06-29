@@ -1,0 +1,712 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Building2, 
+  Rocket, 
+  Users, 
+  TrendingUp, 
+  Star, 
+  ArrowRight,
+  CheckCircle,
+  Globe,
+  Zap,
+  Target,
+  Menu,
+  X,
+  Mail,
+  Phone,
+  MapPin,
+  HelpCircle,
+  MessageSquare,
+  Shield,
+  BarChart3,
+  Search
+} from 'lucide-react';
+
+export default function Index() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    company: '',
+    message: ''
+  });
+  const [stats, setStats] = useState({
+    startups: 0,
+    enterprises: 0,
+    connections: 0,
+    countries: 0
+  });
+
+  useEffect(() => {
+    // Animate stats on load
+    const animateStats = () => {
+      const targets = { startups: 1247, enterprises: 89, connections: 3456, countries: 23 };
+      const duration = 2000;
+      const steps = 60;
+      const stepDuration = duration / steps;
+      
+      let step = 0;
+      const interval = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        
+        setStats({
+          startups: Math.floor(targets.startups * progress),
+          enterprises: Math.floor(targets.enterprises * progress),
+          connections: Math.floor(targets.connections * progress),
+          countries: Math.floor(targets.countries * progress)
+        });
+        
+        if (step >= steps) {
+          clearInterval(interval);
+          setStats(targets);
+        }
+      }, stepDuration);
+    };
+    
+    animateStats();
+  }, []);
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Save contact form to localStorage
+    const contacts = JSON.parse(localStorage.getItem('contactSubmissions') || '[]');
+    const newContact = {
+      ...contactForm,
+      id: Date.now(),
+      timestamp: new Date().toISOString()
+    };
+    contacts.push(newContact);
+    localStorage.setItem('contactSubmissions', JSON.stringify(contacts));
+    
+    toast({
+      title: "Message sent successfully!",
+      description: "We'll get back to you within 24 hours.",
+    });
+    
+    setContactForm({ name: '', email: '', company: '', message: '' });
+    setShowContactForm(false);
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const features = [
+    {
+      icon: <Target className="h-8 w-8" />,
+      title: "AI-Powered Matching",
+      description: "Advanced algorithms connect startups with the most relevant enterprise partners based on technology stack and business needs"
+    },
+    {
+      icon: <Globe className="h-8 w-8" />,
+      title: "Global Network",
+      description: "Access to verified startups and enterprises from over 20 countries with real-time collaboration tools"
+    },
+    {
+      icon: <Shield className="h-8 w-8" />,
+      title: "Verified Profiles",
+      description: "All profiles undergo rigorous verification to ensure quality connections and legitimate business partnerships"
+    },
+    {
+      icon: <BarChart3 className="h-8 w-8" />,
+      title: "Analytics Dashboard",
+      description: "Comprehensive analytics and insights to track partnership success and optimize collaboration strategies"
+    }
+  ];
+
+  const testimonials = [
+    {
+      name: "Sarah Chen",
+      role: "Innovation Director",
+      company: "TechCorp Global",
+      content: "Yhteys transformed our startup discovery process. We found three key partners that accelerated our digital transformation by 300%.",
+      rating: 5
+    },
+    {
+      name: "Marcus Rodriguez",
+      role: "CEO",
+      company: "DataFlow AI",
+      content: "Within weeks of joining, we connected with enterprise clients that became our biggest revenue drivers. The platform is exceptional.",
+      rating: 5
+    },
+    {
+      name: "Lisa Thompson",
+      role: "VP of Partnerships",
+      company: "InnovateCorp",
+      content: "The AI matching is incredibly accurate. It understands our requirements and suggests startups that are perfect fits every time.",
+      rating: 5
+    }
+  ];
+
+  const faqs = [
+    {
+      question: "How does Yhteys match startups with enterprises?",
+      answer: "Our AI-powered matching system analyzes startup profiles, project descriptions, and enterprise requirements to suggest the most relevant connections based on industry, technology stack, team expertise, and business needs."
+    },
+    {
+      question: "What is the cost structure for using Yhteys?",
+      answer: "Basic membership is free for both startups and enterprises. We offer premium tiers with enhanced visibility, advanced matching capabilities, and priority support for growing businesses."
+    },
+    {
+      question: "How do you verify startup and enterprise profiles?",
+      answer: "Our verification process includes email confirmation, business registration validation, team member verification, and profile review by our expert team to ensure authenticity and quality."
+    },
+    {
+      question: "Can I track the progress of my partnerships?",
+      answer: "Yes! Our platform includes comprehensive project tracking, milestone management, communication tools, and rating systems to help you monitor and evaluate partnership success."
+    },
+    {
+      question: "What types of partnerships can I find on Yhteys?",
+      answer: "You can find various partnership types including technology collaborations, pilot programs, joint ventures, service partnerships, investment opportunities, and long-term strategic alliances."
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full z-50 glass-effect border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-lg">Y</span>
+              </div>
+              <span className="text-xl font-semibold text-white">Yhteys</span>
+              <Badge variant="secondary" className="hidden sm:block bg-gray-800 text-gray-300 border-gray-700">
+                Building Connections
+              </Badge>
+            </div>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <button 
+                onClick={() => scrollToSection('home')}
+                className={`text-sm font-medium transition-colors hover:text-white ${activeSection === 'home' ? 'text-white' : 'text-gray-400'}`}
+              >
+                Home
+              </button>
+              <button 
+                onClick={() => scrollToSection('about')}
+                className={`text-sm font-medium transition-colors hover:text-white ${activeSection === 'about' ? 'text-white' : 'text-gray-400'}`}
+              >
+                About
+              </button>
+              <button 
+                onClick={() => scrollToSection('features')}
+                className={`text-sm font-medium transition-colors hover:text-white ${activeSection === 'features' ? 'text-white' : 'text-gray-400'}`}
+              >
+                Features
+              </button>
+              <button 
+                onClick={() => scrollToSection('faq')}
+                className={`text-sm font-medium transition-colors hover:text-white ${activeSection === 'faq' ? 'text-white' : 'text-gray-400'}`}
+              >
+                FAQ
+              </button>
+              <button 
+                onClick={() => setShowContactForm(true)}
+                className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              >
+                Contact
+              </button>
+              <Button 
+                onClick={() => navigate('/auth')}
+                className="button-gradient hover:button-gradient font-medium"
+              >
+                Get Started
+              </Button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="text-white hover:bg-gray-800"
+              >
+                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
+            </div>
+          </div>
+
+          {/* Mobile Navigation Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden py-4 border-t border-gray-800">
+              <div className="flex flex-col space-y-3">
+                <button 
+                  onClick={() => scrollToSection('home')}
+                  className="text-gray-400 hover:text-white px-4 py-2 text-left text-sm font-medium transition-colors"
+                >
+                  Home
+                </button>
+                <button 
+                  onClick={() => scrollToSection('about')}
+                  className="text-gray-400 hover:text-white px-4 py-2 text-left text-sm font-medium transition-colors"
+                >
+                  About
+                </button>
+                <button 
+                  onClick={() => scrollToSection('features')}
+                  className="text-gray-400 hover:text-white px-4 py-2 text-left text-sm font-medium transition-colors"
+                >
+                  Features
+                </button>
+                <button 
+                  onClick={() => scrollToSection('faq')}
+                  className="text-gray-400 hover:text-white px-4 py-2 text-left text-sm font-medium transition-colors"
+                >
+                  FAQ
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowContactForm(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-gray-400 hover:text-white px-4 py-2 text-left text-sm font-medium transition-colors"
+                >
+                  Contact
+                </button>
+                <div className="px-4 pt-2">
+                  <Button 
+                    onClick={() => {
+                      navigate('/auth');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full button-gradient hover:button-gradient font-medium"
+                  >
+                    Get Started
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section id="home" className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="animate-fade-in">
+            <Badge className="bg-gray-900 text-gray-300 border-gray-700 mb-8 px-4 py-2">
+              🚀 Connecting Innovation with Enterprise
+            </Badge>
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-slide-up">
+            Where Startups Meet
+            <span className="block text-gradient-accent">Enterprise Excellence</span>
+          </h1>
+          
+          <p className="text-lg sm:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
+            Yhteys is the premier platform connecting innovative startups with enterprise partners. 
+            Discover opportunities, build partnerships, and accelerate growth through AI-powered matching.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
+            <Button 
+              size="lg" 
+              className="button-gradient hover:button-gradient px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => navigate('/auth')}
+            >
+              <Rocket className="mr-2 h-5 w-5" />
+              Start Building Connections
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+            
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-gray-700 text-white hover:bg-gray-900 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => scrollToSection('about')}
+            >
+              Learn More
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-950 border-y border-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
+                {stats.startups.toLocaleString()}+
+              </div>
+              <div className="text-gray-400 font-medium">Active Startups</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
+                {stats.enterprises}+
+              </div>
+              <div className="text-gray-400 font-medium">Enterprise Partners</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
+                {stats.connections.toLocaleString()}+
+              </div>
+              <div className="text-gray-400 font-medium">Successful Connections</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
+                {stats.countries}+
+              </div>
+              <div className="text-gray-400 font-medium">Countries</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              About Yhteys
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Yhteys (Finnish for "connection") bridges the gap between innovative startups and forward-thinking enterprises, 
+              creating partnerships that drive technological advancement and business growth.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">Our Mission</h3>
+              <p className="text-gray-400 text-lg leading-relaxed">
+                We believe that the future of business lies in collaboration between agile startups and established enterprises. 
+                Our platform uses advanced AI matching to connect the right partners at the right time, fostering innovation 
+                and accelerating digital transformation across industries.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Card className="card-gradient hover-lift">
+                  <CardContent className="p-6">
+                    <h4 className="text-white font-semibold mb-2">For Startups</h4>
+                    <p className="text-gray-400 text-sm">Access enterprise clients, scale your solutions, and accelerate growth through strategic partnerships.</p>
+                  </CardContent>
+                </Card>
+                <Card className="card-gradient hover-lift">
+                  <CardContent className="p-6">
+                    <h4 className="text-white font-semibold mb-2">For Enterprises</h4>
+                    <p className="text-gray-400 text-sm">Discover cutting-edge solutions, drive innovation, and stay competitive in the digital age.</p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+            <Card className="card-gradient hover-lift">
+              <CardContent className="p-8">
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Why Choose Yhteys?</h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
+                    <span className="text-gray-300">AI-powered matching algorithm with 95% accuracy</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
+                    <span className="text-gray-300">Verified profiles and secure connections</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
+                    <span className="text-gray-300">Project tracking and collaboration tools</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
+                    <span className="text-gray-300">Global network spanning 20+ countries</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
+                    <span className="text-gray-300">24/7 support and partnership guidance</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-950 border-y border-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              Platform Features
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Our platform combines cutting-edge technology with human insight to create meaningful business connections.
+            </p>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="card-gradient hover-lift">
+                <CardHeader className="text-center pb-4">
+                  <div className="mx-auto mb-4 p-3 bg-white rounded-lg w-fit text-black">
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="text-white text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-gray-400 text-center">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-gray-400">
+              Get answers to common questions about the Yhteys platform.
+            </p>
+          </div>
+          
+          <div className="space-y-6">
+            {faqs.map((faq, index) => (
+              <Card key={index} className="card-gradient hover-lift">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-start text-lg">
+                    <HelpCircle className="h-5 w-5 mr-3 mt-0.5 text-gray-400 shrink-0" />
+                    {faq.question}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-400 ml-8">{faq.answer}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-950 border-y border-gray-800">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              Success Stories
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Hear from our community about how Yhteys has transformed their business relationships.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="card-gradient hover-lift">
+                <CardHeader>
+                  <div className="flex items-center space-x-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <CardDescription className="text-gray-300 text-lg italic">
+                    "{testimonial.content}"
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-white font-semibold">{testimonial.name}</div>
+                  <div className="text-gray-400 text-sm">{testimonial.role}</div>
+                  <div className="text-gray-500 text-sm">{testimonial.company}</div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+            Ready to Build Your Next Connection?
+          </h2>
+          <p className="text-xl text-gray-400 mb-12">
+            Join thousands of startups and enterprises already using Yhteys to accelerate their growth.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              size="lg" 
+              className="button-gradient hover:button-gradient px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => navigate('/auth')}
+            >
+              <Rocket className="mr-2 h-5 w-5" />
+              Get Started Now
+            </Button>
+            
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-gray-700 text-white hover:bg-gray-900 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => setShowContactForm(true)}
+            >
+              <MessageSquare className="mr-2 h-5 w-5" />
+              Contact Us
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Form Modal */}
+      {showContactForm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card className="card-gradient max-w-md w-full">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-white text-xl">Contact Us</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowContactForm(false)}
+                  className="text-gray-400 hover:text-white hover:bg-gray-800"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <CardDescription className="text-gray-400">
+                Get in touch with our team. We'll respond within 24 hours.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleContactSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="text-white">Name *</Label>
+                  <Input
+                    id="name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    placeholder="Your full name"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email" className="text-white">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="company" className="text-white">Company</Label>
+                  <Input
+                    id="company"
+                    value={contactForm.company}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, company: e.target.value }))}
+                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    placeholder="Your company name"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="message" className="text-white">Message *</Label>
+                  <Textarea
+                    id="message"
+                    value={contactForm.message}
+                    onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                    className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    placeholder="How can we help you?"
+                    rows={4}
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full button-gradient hover:button-gradient font-medium"
+                >
+                  Send Message
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-gray-950 border-t border-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="md:col-span-2">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                  <span className="text-black font-bold text-lg">Y</span>
+                </div>
+                <span className="text-xl font-semibold text-white">Yhteys</span>
+              </div>
+              <p className="text-gray-400 mb-4">
+                Building connections that matter. Connecting innovation with enterprise, worldwide.
+              </p>
+              <div className="flex space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white hover:bg-gray-800"
+                  onClick={() => setShowContactForm(true)}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Contact
+                </Button>
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-white transition-colors">About</button></li>
+                <li><button onClick={() => scrollToSection('features')} className="text-gray-400 hover:text-white transition-colors">Features</button></li>
+                <li><button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-white transition-colors">FAQ</button></li>
+                <li><button onClick={() => navigate('/auth')} className="text-gray-400 hover:text-white transition-colors">Login</button></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="text-white font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-sm">
+                <li><button onClick={() => setShowContactForm(true)} className="text-gray-400 hover:text-white transition-colors">Contact Us</button></li>
+                <li><span className="text-gray-400">Help Center</span></li>
+                <li><span className="text-gray-400">Privacy Policy</span></li>
+                <li><span className="text-gray-400">Terms of Service</span></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400 text-sm">&copy; 2024 Yhteys. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
