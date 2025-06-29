@@ -1,0 +1,56 @@
+{
+  "recommendations": [
+    {
+      "startup_name": "AI Workflow Solutions",
+      "match_score": 95,
+      "reasoning": "Perfect match for AI automation projects with proven enterprise experience and strong technical capabilities in machine learning and workflow optimization.",
+      "contact_info": {
+        "email": "contact@aiworkflow.com",
+        "phone": "+1 (555) 123-4567"
+      },
+      "expertise": ["AI/ML", "Automation", "Enterprise Integration", "Python", "TensorFlow"],
+      "estimated_timeline": "3-4 months",
+      "estimated_cost": "$75,000 - $120,000"
+    },
+    {
+      "startup_name": "DataFlow Analytics",
+      "match_score": 88,
+      "reasoning": "Strong data processing capabilities and real-time analytics expertise that aligns well with your project requirements.",
+      "contact_info": {
+        "email": "hello@dataflow.io",
+        "phone": "+1 (555) 987-6543"
+      },
+      "expertise": ["Data Analytics", "Real-time Processing", "Business Intelligence", "Apache Spark"],
+      "estimated_timeline": "2-3 months",
+      "estimated_cost": "$50,000 - $80,000"
+    },
+    {
+      "startup_name": "SecureCloud Pro",
+      "match_score": 82,
+      "reasoning": "Excellent security practices and cloud infrastructure expertise with proven track record in enterprise deployments.",
+      "contact_info": {
+        "email": "security@securecloud.pro",
+        "phone": "+1 (555) 456-7890"
+      },
+      "expertise": ["Cloud Security", "Infrastructure", "Compliance", "AWS", "Kubernetes"],
+      "estimated_timeline": "4-6 months",
+      "estimated_cost": "$90,000 - $150,000"
+    }
+  ],
+  "analysis": {
+    "project_complexity": "Medium-High",
+    "recommended_approach": "Agile development with MVP first, then iterative improvements",
+    "key_considerations": [
+      "Ensure data privacy compliance (GDPR, CCPA)",
+      "Plan for scalability from day one",
+      "Consider integration with existing enterprise systems",
+      "Budget for ongoing maintenance and support",
+      "Implement proper security measures for sensitive data"
+    ]
+  },
+  "metadata": {
+    "analysis_timestamp": "2024-01-15T10:30:00Z",
+    "total_startups_analyzed": 1247,
+    "matching_algorithm_version": "2.1.0"
+  }
+}
