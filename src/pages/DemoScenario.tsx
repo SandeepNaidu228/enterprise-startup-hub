@@ -413,7 +413,7 @@ export default function DemoScenario() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </div>
-            </div>
+            </CardContent>
           </Card>
         )}
       </div>
