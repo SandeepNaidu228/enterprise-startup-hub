@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { ClearDataButton } from '@/components/ClearDataButton';
+import { getLocalDataStatus } from '@/lib/clearLocalData';
 import { 
   Building2, 
   Rocket, 
@@ -30,7 +32,9 @@ import {
   Search,
   Brain,
   Sparkles,
-  Play
+  Play,
+  Database,
+  RefreshCw
 } from 'lucide-react';
 
 export default function Index() {
@@ -38,7 +42,9 @@ export default function Index() {
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
+  const [showClearData, setShowClearData] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [dataStatus, setDataStatus] = useState(getLocalDataStatus());
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -53,6 +59,9 @@ export default function Index() {
   });
 
   useEffect(() => {
+    // Update data status
+    setDataStatus(getLocalDataStatus());
+    
     // Animate stats on load
     const animateStats = () => {
       const targets = { startups: 1247, enterprises: 89, connections: 3456, countries: 23 };
@@ -112,6 +121,8 @@ export default function Index() {
     }
     setMobileMenuOpen(false);
   };
+
+  const hasLocalData = dataStatus.startups > 0 || dataStatus.enterprises > 0 || dataStatus.projectRequests > 0 || dataStatus.hasAuth;
 
   const features = [
     {
@@ -232,6 +243,17 @@ export default function Index() {
               >
                 Contact
               </button>
+              {hasLocalData && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowClearData(true)}
+                  className="border-red-600 text-red-400 hover:bg-red-900/20"
+                >
+                  <Database className="mr-2 h-4 w-4" />
+                  Clear Data
+                </Button>
+              )}
               <Button 
                 onClick={() => navigate('/demo')}
                 variant="outline"
@@ -299,6 +321,20 @@ export default function Index() {
                   Contact
                 </button>
                 <div className="px-4 pt-2 space-y-2">
+                  {hasLocalData && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowClearData(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full border-red-600 text-red-400 hover:bg-red-900/20"
+                    >
+                      <Database className="mr-2 h-4 w-4" />
+                      Clear Data
+                    </Button>
+                  )}
                   <Button 
                     onClick={() => {
                       navigate('/demo');
@@ -326,8 +362,20 @@ export default function Index() {
         </div>
       </nav>
 
+      {/* Database Status Banner */}
+      {!hasLocalData && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-green-900/20 border-b border-green-600/30 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <div className="flex items-center justify-center space-x-2 text-green-400 text-sm">
+              <CheckCircle className="h-4 w-4" />
+              <span>✨ Fresh Database Ready - Connect to Supabase for production data</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section */}
-      <section id="home" className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
+      <section id="home" className={`${!hasLocalData ? 'pt-32' : 'pt-24'} pb-20 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-7xl mx-auto text-center">
           <div className="animate-fade-in">
             <Badge className="bg-gray-900 text-gray-300 border-gray-700 mb-8 px-4 py-2">
@@ -689,6 +737,24 @@ export default function Index() {
               </form>
             </CardContent>
           </Card>
+        </div>
+      )}
+
+      {/* Clear Data Modal */}
+      {showClearData && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-md w-full">
+            <ClearDataButton />
+            <div className="mt-4 text-center">
+              <Button
+                variant="ghost"
+                onClick={() => setShowClearData(false)}
+                className="text-gray-400 hover:text-white hover:bg-gray-800"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 
