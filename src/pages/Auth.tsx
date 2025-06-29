@@ -9,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { db } from '@/lib/supabase';
-import { Rocket, Building2, Plus, X, ArrowLeft, Users } from 'lucide-react';
+import { db, supabase } from '@/lib/supabase';
+import { Rocket, Building2, Plus, X, ArrowLeft, Users, Key, AlertCircle } from 'lucide-react';
 
 interface TeamMember {
   name: string;
@@ -40,6 +40,7 @@ interface StartupFormData {
   fundingStage: string;
   teamSize: number;
   foundedYear: number;
+  password: string;
 }
 
 interface EnterpriseFormData {
@@ -48,6 +49,8 @@ interface EnterpriseFormData {
   industry: string;
   companySize: string;
   location: string;
+  email: string;
+  password: string;
 }
 
 export default function Auth() {
@@ -57,6 +60,8 @@ export default function Auth() {
   const [userType, setUserType] = useState<'startup' | 'enterprise'>('startup');
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPasswordReset, setShowPasswordReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
   
   const [loginData, setLoginData] = useState({
     email: '',
@@ -78,7 +83,8 @@ export default function Auth() {
     tags: [],
     fundingStage: '',
     teamSize: 1,
-    foundedYear: new Date().getFullYear()
+    foundedYear: new Date().getFullYear(),
+    password: ''
   });
 
   const [enterpriseFormData, setEnterpriseFormData] = useState<EnterpriseFormData>({
@@ -86,7 +92,9 @@ export default function Auth() {
     contactPerson: '',
     industry: '',
     companySize: '',
-    location: ''
+    location: '',
+    email: '',
+    password: ''
   });
 
   const [newTag, setNewTag] = useState('');
@@ -118,6 +126,37 @@ export default function Auth() {
       }
     } catch (error) {
       // User doesn't have a profile yet, stay on auth page
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Password reset email sent!",
+        description: "Check your email for instructions to reset your password.",
+      });
+
+      setShowPasswordReset(false);
+      setResetEmail('');
+    } catch (error: any) {
+      toast({
+        title: "Password reset failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -168,14 +207,18 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (!startupFormData.name || !startupFormData.contact.email) {
-        throw new Error('Please fill in all required fields');
+      if (!startupFormData.name || !startupFormData.contact.email || !startupFormData.password) {
+        throw new Error('Please fill in all required fields including password');
       }
 
-      // Create auth user
+      if (startupFormData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
+      }
+
+      // Create auth user with the provided password
       const { data: authData, error: authError } = await signUp(
         startupFormData.contact.email,
-        'temp_password_123', // You might want to add a password field
+        startupFormData.password,
         { user_type: 'startup' }
       );
 
@@ -234,14 +277,18 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (!enterpriseFormData.companyName || !enterpriseFormData.contactPerson || !loginData.email) {
-        throw new Error('Please fill in all required fields');
+      if (!enterpriseFormData.companyName || !enterpriseFormData.contactPerson || !enterpriseFormData.email || !enterpriseFormData.password) {
+        throw new Error('Please fill in all required fields including password');
+      }
+
+      if (enterpriseFormData.password.length < 6) {
+        throw new Error('Password must be at least 6 characters long');
       }
 
       // Create auth user
       const { data: authData, error: authError } = await signUp(
-        loginData.email,
-        loginData.password,
+        enterpriseFormData.email,
+        enterpriseFormData.password,
         { user_type: 'enterprise' }
       );
 
@@ -258,7 +305,7 @@ export default function Auth() {
         user_id: authData.user.id,
         company_name: enterpriseFormData.companyName,
         contact_person: enterpriseFormData.contactPerson,
-        email: loginData.email,
+        email: enterpriseFormData.email,
         industry: enterpriseFormData.industry,
         company_size: enterpriseFormData.companySize,
         location: enterpriseFormData.location
@@ -498,6 +545,18 @@ export default function Auth() {
                   />
                 </div>
 
+                <div className="flex justify-between items-center">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setShowPasswordReset(true)}
+                    className="text-gray-400 hover:text-white text-sm p-0 h-auto"
+                  >
+                    <Key className="mr-1 h-3 w-3" />
+                    Forgot password?
+                  </Button>
+                </div>
+
                 <Button 
                   type="submit" 
                   className="w-full button-gradient hover:button-gradient font-medium"
@@ -581,7 +640,7 @@ export default function Auth() {
 
                 {/* Contact Information */}
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-white">Contact Information</h3>
+                  <h3 className="text-xl font-semibold text-white">Contact & Security</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -612,6 +671,24 @@ export default function Auth() {
                         className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                         placeholder="+1 (555) 123-4567"
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="password" className="text-white">Password *</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={startupFormData.password}
+                      onChange={(e) => setStartupFormData(prev => ({ ...prev, password: e.target.value }))}
+                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                      placeholder="Create a secure password (min 6 characters)"
+                      required
+                      minLength={6}
+                    />
+                    <div className="flex items-center mt-1 text-xs text-gray-500">
+                      <AlertCircle className="mr-1 h-3 w-3" />
+                      Password must be at least 6 characters long
                     </div>
                   </div>
                 </div>
@@ -705,8 +782,8 @@ export default function Auth() {
                     <Input
                       id="email"
                       type="email"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
+                      value={enterpriseFormData.email}
+                      onChange={(e) => setEnterpriseFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                       placeholder="enterprise@company.com"
                       required
@@ -718,13 +795,19 @@ export default function Auth() {
                     <Input
                       id="password"
                       type="password"
-                      value={loginData.password}
-                      onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
+                      value={enterpriseFormData.password}
+                      onChange={(e) => setEnterpriseFormData(prev => ({ ...prev, password: e.target.value }))}
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
-                      placeholder="Your password"
+                      placeholder="Create a secure password (min 6 characters)"
                       required
+                      minLength={6}
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center text-xs text-gray-500">
+                  <AlertCircle className="mr-1 h-3 w-3" />
+                  Password must be at least 6 characters long
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -843,6 +926,66 @@ export default function Auth() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Password Reset Modal */}
+        {showPasswordReset && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="card-gradient max-w-md w-full">
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-white text-xl flex items-center">
+                    <Key className="mr-2 h-5 w-5" />
+                    Reset Password
+                  </CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowPasswordReset(false)}
+                    className="text-gray-400 hover:text-white hover:bg-gray-800"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <CardDescription className="text-gray-400">
+                  Enter your email address and we'll send you a link to reset your password.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePasswordReset} className="space-y-4">
+                  <div>
+                    <Label htmlFor="resetEmail" className="text-white">Email Address</Label>
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                      placeholder="your@email.com"
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800"
+                      onClick={() => setShowPasswordReset(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 button-gradient hover:button-gradient"
+                      disabled={loading}
+                    >
+                      {loading ? 'Sending...' : 'Send Reset Link'}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
