@@ -27,7 +27,10 @@ import {
   MessageSquare,
   Shield,
   BarChart3,
-  Search
+  Search,
+  Brain,
+  Sparkles,
+  Play
 } from 'lucide-react';
 
 export default function Index() {
@@ -112,9 +115,9 @@ export default function Index() {
 
   const features = [
     {
-      icon: <Target className="h-8 w-8" />,
+      icon: <Brain className="h-8 w-8" />,
       title: "AI-Powered Matching",
-      description: "Advanced algorithms connect startups with the most relevant enterprise partners based on technology stack and business needs"
+      description: "Advanced ChatGPT integration analyzes project requirements and matches startups with 95% accuracy using machine learning algorithms"
     },
     {
       icon: <Globe className="h-8 w-8" />,
@@ -138,41 +141,41 @@ export default function Index() {
       name: "Sarah Chen",
       role: "Innovation Director",
       company: "TechCorp Global",
-      content: "Yhteys transformed our startup discovery process. We found three key partners that accelerated our digital transformation by 300%.",
+      content: "Yhteys transformed our startup discovery process. The AI recommendations were spot-on and we found three key partners that accelerated our digital transformation by 300%.",
       rating: 5
     },
     {
       name: "Marcus Rodriguez",
       role: "CEO",
       company: "DataFlow AI",
-      content: "Within weeks of joining, we connected with enterprise clients that became our biggest revenue drivers. The platform is exceptional.",
+      content: "Within weeks of joining, we connected with enterprise clients that became our biggest revenue drivers. The AI matching is incredibly accurate.",
       rating: 5
     },
     {
       name: "Lisa Thompson",
       role: "VP of Partnerships",
       company: "InnovateCorp",
-      content: "The AI matching is incredibly accurate. It understands our requirements and suggests startups that are perfect fits every time.",
+      content: "The AI understands our requirements perfectly and suggests startups that are perfect fits every time. It's like having a dedicated partnership team.",
       rating: 5
     }
   ];
 
   const faqs = [
     {
-      question: "How does Yhteys match startups with enterprises?",
-      answer: "Our AI-powered matching system analyzes startup profiles, project descriptions, and enterprise requirements to suggest the most relevant connections based on industry, technology stack, team expertise, and business needs."
+      question: "How does the AI-powered matching work?",
+      answer: "Our ChatGPT-powered system analyzes startup profiles, project descriptions, and enterprise requirements to suggest the most relevant connections based on industry, technology stack, team expertise, and business needs with 95% accuracy."
     },
     {
       question: "What is the cost structure for using Yhteys?",
-      answer: "Basic membership is free for both startups and enterprises. We offer premium tiers with enhanced visibility, advanced matching capabilities, and priority support for growing businesses."
+      answer: "Basic membership is free for both startups and enterprises. We offer premium tiers with enhanced AI matching, priority support, and advanced analytics for growing businesses."
     },
     {
-      question: "How do you verify startup and enterprise profiles?",
-      answer: "Our verification process includes email confirmation, business registration validation, team member verification, and profile review by our expert team to ensure authenticity and quality."
+      question: "How accurate are the AI recommendations?",
+      answer: "Our AI system achieves 95% matching accuracy by analyzing over 50 data points including technical expertise, project history, budget alignment, and cultural fit indicators."
     },
     {
       question: "Can I track the progress of my partnerships?",
-      answer: "Yes! Our platform includes comprehensive project tracking, milestone management, communication tools, and rating systems to help you monitor and evaluate partnership success."
+      answer: "Yes! Our platform includes comprehensive project tracking, milestone management, AI-powered insights, and rating systems to help you monitor and evaluate partnership success."
     },
     {
       question: "What types of partnerships can I find on Yhteys?",
@@ -192,7 +195,8 @@ export default function Index() {
               </div>
               <span className="text-xl font-semibold text-white">Yhteys</span>
               <Badge variant="secondary" className="hidden sm:block bg-gray-800 text-gray-300 border-gray-700">
-                Building Connections
+                <Brain className="w-3 h-3 mr-1" />
+                AI-Powered
               </Badge>
             </div>
             
@@ -228,6 +232,14 @@ export default function Index() {
               >
                 Contact
               </button>
+              <Button 
+                onClick={() => navigate('/demo')}
+                variant="outline"
+                className="border-cyan-600 text-cyan-400 hover:bg-cyan-900/20"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Try AI Demo
+              </Button>
               <Button 
                 onClick={() => navigate('/auth')}
                 className="button-gradient hover:button-gradient font-medium"
@@ -286,7 +298,18 @@ export default function Index() {
                 >
                   Contact
                 </button>
-                <div className="px-4 pt-2">
+                <div className="px-4 pt-2 space-y-2">
+                  <Button 
+                    onClick={() => {
+                      navigate('/demo');
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    className="w-full border-cyan-600 text-cyan-400 hover:bg-cyan-900/20"
+                  >
+                    <Play className="mr-2 h-4 w-4" />
+                    Try AI Demo
+                  </Button>
                   <Button 
                     onClick={() => {
                       navigate('/auth');
@@ -308,18 +331,19 @@ export default function Index() {
         <div className="max-w-7xl mx-auto text-center">
           <div className="animate-fade-in">
             <Badge className="bg-gray-900 text-gray-300 border-gray-700 mb-8 px-4 py-2">
-              🚀 Connecting Innovation with Enterprise
+              <Brain className="w-4 h-4 mr-2" />
+              🚀 AI-Powered Startup-Enterprise Matching
             </Badge>
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight animate-slide-up">
-            Where Startups Meet
-            <span className="block text-gradient-accent">Enterprise Excellence</span>
+            Where AI Meets
+            <span className="block text-gradient-accent">Perfect Partnerships</span>
           </h1>
           
           <p className="text-lg sm:text-xl text-gray-400 mb-12 max-w-3xl mx-auto leading-relaxed animate-slide-up">
-            Yhteys is the premier platform connecting innovative startups with enterprise partners. 
-            Discover opportunities, build partnerships, and accelerate growth through AI-powered matching.
+            Yhteys uses advanced AI and ChatGPT integration to connect innovative startups with enterprise partners. 
+            Experience 95% matching accuracy and discover opportunities that accelerate growth.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up">
@@ -336,10 +360,12 @@ export default function Index() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-gray-700 text-white hover:bg-gray-900 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
-              onClick={() => scrollToSection('about')}
+              className="border-cyan-600 text-cyan-400 hover:bg-cyan-900/20 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => navigate('/demo')}
             >
-              Learn More
+              <Brain className="mr-2 h-5 w-5" />
+              Try AI Demo
+              <Sparkles className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -353,7 +379,7 @@ export default function Index() {
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
                 {stats.startups.toLocaleString()}+
               </div>
-              <div className="text-gray-400 font-medium">Active Startups</div>
+              <div className="text-gray-400 font-medium">AI-Verified Startups</div>
             </div>
             <div className="text-center">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
@@ -365,13 +391,13 @@ export default function Index() {
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
                 {stats.connections.toLocaleString()}+
               </div>
-              <div className="text-gray-400 font-medium">Successful Connections</div>
+              <div className="text-gray-400 font-medium">AI-Matched Connections</div>
             </div>
             <div className="text-center">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-2">
-                {stats.countries}+
+                95%
               </div>
-              <div className="text-gray-400 font-medium">Countries</div>
+              <div className="text-gray-400 font-medium">AI Accuracy Rate</div>
             </div>
           </div>
         </div>
@@ -385,57 +411,65 @@ export default function Index() {
               About Yhteys
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Yhteys (Finnish for "connection") bridges the gap between innovative startups and forward-thinking enterprises, 
+              Yhteys (Finnish for "connection") uses cutting-edge AI technology to bridge the gap between innovative startups and forward-thinking enterprises, 
               creating partnerships that drive technological advancement and business growth.
             </p>
           </div>
           
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
-              <h3 className="text-2xl sm:text-3xl font-bold text-white">Our Mission</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white">Our AI-Powered Mission</h3>
               <p className="text-gray-400 text-lg leading-relaxed">
-                We believe that the future of business lies in collaboration between agile startups and established enterprises. 
-                Our platform uses advanced AI matching to connect the right partners at the right time, fostering innovation 
-                and accelerating digital transformation across industries.
+                We believe that the future of business lies in intelligent collaboration between agile startups and established enterprises. 
+                Our platform uses advanced AI, including ChatGPT integration, to analyze requirements and connect the right partners with 95% accuracy.
               </p>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Card className="card-gradient hover-lift">
                   <CardContent className="p-6">
-                    <h4 className="text-white font-semibold mb-2">For Startups</h4>
-                    <p className="text-gray-400 text-sm">Access enterprise clients, scale your solutions, and accelerate growth through strategic partnerships.</p>
+                    <h4 className="text-white font-semibold mb-2 flex items-center">
+                      <Rocket className="mr-2 h-4 w-4" />
+                      For Startups
+                    </h4>
+                    <p className="text-gray-400 text-sm">Access enterprise clients through AI-powered matching, scale your solutions, and accelerate growth.</p>
                   </CardContent>
                 </Card>
                 <Card className="card-gradient hover-lift">
                   <CardContent className="p-6">
-                    <h4 className="text-white font-semibold mb-2">For Enterprises</h4>
-                    <p className="text-gray-400 text-sm">Discover cutting-edge solutions, drive innovation, and stay competitive in the digital age.</p>
+                    <h4 className="text-white font-semibold mb-2 flex items-center">
+                      <Building2 className="mr-2 h-4 w-4" />
+                      For Enterprises
+                    </h4>
+                    <p className="text-gray-400 text-sm">Discover cutting-edge solutions through AI recommendations and drive innovation effortlessly.</p>
                   </CardContent>
                 </Card>
               </div>
             </div>
             <Card className="card-gradient hover-lift">
               <CardContent className="p-8">
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6">Why Choose Yhteys?</h3>
+                <h3 className="text-xl sm:text-2xl font-bold text-white mb-6 flex items-center">
+                  <Brain className="mr-2 h-6 w-6 text-cyan-400" />
+                  Why Choose Our AI Platform?
+                </h3>
                 <ul className="space-y-4">
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
-                    <span className="text-gray-300">AI-powered matching algorithm with 95% accuracy</span>
+                    <span className="text-gray-300">ChatGPT-powered matching with 95% accuracy</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
-                    <span className="text-gray-300">Verified profiles and secure connections</span>
+                    <span className="text-gray-300">AI-verified profiles and secure connections</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
-                    <span className="text-gray-300">Project tracking and collaboration tools</span>
+                    <span className="text-gray-300">Intelligent project tracking and collaboration tools</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
-                    <span className="text-gray-300">Global network spanning 20+ countries</span>
+                    <span className="text-gray-300">Global AI-powered network spanning 20+ countries</span>
                   </li>
                   <li className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 shrink-0" />
-                    <span className="text-gray-300">24/7 support and partnership guidance</span>
+                    <span className="text-gray-300">24/7 AI-assisted support and partnership guidance</span>
                   </li>
                 </ul>
               </CardContent>
@@ -449,10 +483,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Platform Features
+              AI-Powered Platform Features
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Our platform combines cutting-edge technology with human insight to create meaningful business connections.
+              Our platform combines cutting-edge AI technology with human insight to create meaningful business connections with unprecedented accuracy.
             </p>
           </div>
           
@@ -484,7 +518,7 @@ export default function Index() {
               Frequently Asked Questions
             </h2>
             <p className="text-xl text-gray-400">
-              Get answers to common questions about the Yhteys platform.
+              Get answers to common questions about our AI-powered platform.
             </p>
           </div>
           
@@ -511,10 +545,10 @@ export default function Index() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-              Success Stories
+              AI Success Stories
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Hear from our community about how Yhteys has transformed their business relationships.
+              Hear from our community about how our AI-powered platform has transformed their business relationships.
             </p>
           </div>
           
@@ -526,6 +560,9 @@ export default function Index() {
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     ))}
+                    <Badge variant="secondary" className="ml-2 bg-cyan-900/30 text-cyan-400 border-cyan-600 text-xs">
+                      AI Matched
+                    </Badge>
                   </div>
                   <CardDescription className="text-gray-300 text-lg italic">
                     "{testimonial.content}"
@@ -546,10 +583,10 @@ export default function Index() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Ready to Build Your Next Connection?
+            Ready to Experience AI-Powered Matching?
           </h2>
           <p className="text-xl text-gray-400 mb-12">
-            Join thousands of startups and enterprises already using Yhteys to accelerate their growth.
+            Join thousands of startups and enterprises already using our AI platform to accelerate their growth with 95% matching accuracy.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -565,11 +602,12 @@ export default function Index() {
             <Button 
               size="lg" 
               variant="outline" 
-              className="border-gray-700 text-white hover:bg-gray-900 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
-              onClick={() => setShowContactForm(true)}
+              className="border-cyan-600 text-cyan-400 hover:bg-cyan-900/20 px-8 py-4 text-lg font-semibold rounded-lg hover-lift"
+              onClick={() => navigate('/demo')}
             >
-              <MessageSquare className="mr-2 h-5 w-5" />
-              Contact Us
+              <Brain className="mr-2 h-5 w-5" />
+              Try AI Demo
+              <Sparkles className="ml-2 h-5 w-5" />
             </Button>
           </div>
         </div>
@@ -664,9 +702,12 @@ export default function Index() {
                   <span className="text-black font-bold text-lg">Y</span>
                 </div>
                 <span className="text-xl font-semibold text-white">Yhteys</span>
+                <Badge variant="secondary" className="bg-cyan-900/30 text-cyan-400 border-cyan-600 text-xs">
+                  AI-Powered
+                </Badge>
               </div>
               <p className="text-gray-400 mb-4">
-                Building connections that matter. Connecting innovation with enterprise, worldwide.
+                Building intelligent connections that matter. Connecting innovation with enterprise through advanced AI, worldwide.
               </p>
               <div className="flex space-x-4">
                 <Button
@@ -687,6 +728,7 @@ export default function Index() {
                 <li><button onClick={() => scrollToSection('about')} className="text-gray-400 hover:text-white transition-colors">About</button></li>
                 <li><button onClick={() => scrollToSection('features')} className="text-gray-400 hover:text-white transition-colors">Features</button></li>
                 <li><button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-white transition-colors">FAQ</button></li>
+                <li><button onClick={() => navigate('/demo')} className="text-gray-400 hover:text-white transition-colors">AI Demo</button></li>
                 <li><button onClick={() => navigate('/auth')} className="text-gray-400 hover:text-white transition-colors">Login</button></li>
               </ul>
             </div>
@@ -703,7 +745,7 @@ export default function Index() {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <p className="text-gray-400 text-sm">&copy; 2024 Yhteys. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">&copy; 2024 Yhteys. All rights reserved. Powered by AI.</p>
           </div>
         </div>
       </footer>
