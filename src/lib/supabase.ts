@@ -70,7 +70,7 @@ export const db = {
         .from('startups')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
     },
 
     update: async (id: string, updates: any) => {
@@ -102,7 +102,7 @@ export const db = {
         .from('enterprises')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
     },
 
     update: async (id: string, updates: any) => {
