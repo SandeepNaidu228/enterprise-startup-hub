@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/lib/supabase';
 import { Rocket, Building2, Plus, X, ArrowLeft, Users } from 'lucide-react';
 
 interface TeamMember {
@@ -38,12 +40,9 @@ interface StartupFormData {
   fundingStage: string;
   teamSize: number;
   foundedYear: number;
-  password: string;
 }
 
 interface EnterpriseFormData {
-  email: string;
-  password: string;
   companyName: string;
   contactPerson: string;
   industry: string;
@@ -54,6 +53,7 @@ interface EnterpriseFormData {
 export default function Auth() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signUp, signIn, loading: authLoading } = useAuth();
   const [userType, setUserType] = useState<'startup' | 'enterprise'>('startup');
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -78,13 +78,10 @@ export default function Auth() {
     tags: [],
     fundingStage: '',
     teamSize: 1,
-    foundedYear: new Date().getFullYear(),
-    password: ''
+    foundedYear: new Date().getFullYear()
   });
 
   const [enterpriseFormData, setEnterpriseFormData] = useState<EnterpriseFormData>({
-    email: '',
-    password: '',
     companyName: '',
     contactPerson: '',
     industry: '',
@@ -96,16 +93,33 @@ export default function Auth() {
   const [newTech, setNewTech] = useState('');
 
   useEffect(() => {
-    // Check if already authenticated
-    const startupAuth = localStorage.getItem('startupAuth');
-    const enterpriseAuth = localStorage.getItem('enterpriseAuth');
-    
-    if (startupAuth) {
-      navigate('/startup-dashboard');
-    } else if (enterpriseAuth) {
-      navigate('/enterprise-dashboard');
+    if (user) {
+      // Check if user has startup or enterprise profile
+      checkUserProfile();
     }
-  }, [navigate]);
+  }, [user]);
+
+  const checkUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      // Check for startup profile
+      const { data: startup } = await db.startups.getByUserId(user.id);
+      if (startup) {
+        navigate('/startup-dashboard');
+        return;
+      }
+
+      // Check for enterprise profile
+      const { data: enterprise } = await db.enterprises.getByUserId(user.id);
+      if (enterprise) {
+        navigate('/enterprise-dashboard');
+        return;
+      }
+    } catch (error) {
+      // User doesn't have a profile yet, stay on auth page
+    }
+  };
 
   const industries = [
     'SaaS', 'FinTech', 'HealthTech', 'EdTech', 'E-commerce', 'AI/ML', 
@@ -126,53 +140,18 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (userType === 'startup') {
-        const existingStartups = JSON.parse(localStorage.getItem('startups') || '[]');
-        const startup = existingStartups.find((s: any) => s.contact.email === loginData.email);
-        
-        if (!startup) {
-          throw new Error('Startup not found. Please register first.');
-        }
-
-        const startupAuth = {
-          email: loginData.email,
-          startupId: startup.id,
-          isAuthenticated: true
-        };
-        
-        localStorage.setItem('startupAuth', JSON.stringify(startupAuth));
-        localStorage.setItem('startupData', JSON.stringify(startup));
-
-        toast({
-          title: "Login successful!",
-          description: "Welcome back to Yhteys.",
-        });
-
-        navigate('/startup-dashboard');
-      } else {
-        const existingEnterprises = JSON.parse(localStorage.getItem('enterprises') || '[]');
-        const enterprise = existingEnterprises.find((e: any) => e.email === loginData.email);
-        
-        if (!enterprise) {
-          throw new Error('Enterprise not found. Please register first.');
-        }
-
-        const enterpriseAuth = {
-          email: loginData.email,
-          enterpriseId: enterprise.id,
-          isAuthenticated: true
-        };
-        
-        localStorage.setItem('enterpriseAuth', JSON.stringify(enterpriseAuth));
-        localStorage.setItem('enterpriseData', JSON.stringify(enterprise));
-
-        toast({
-          title: "Login successful!",
-          description: "Welcome back to Yhteys Enterprise Portal.",
-        });
-
-        navigate('/enterprise-dashboard');
+      const { error } = await signIn(loginData.email, loginData.password);
+      
+      if (error) {
+        throw error;
       }
+
+      toast({
+        title: "Login successful!",
+        description: "Welcome back to Yhteys.",
+      });
+
+      // Navigation will be handled by useEffect when user state updates
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -189,34 +168,49 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (!startupFormData.name || !startupFormData.contact.email || !startupFormData.password) {
+      if (!startupFormData.name || !startupFormData.contact.email) {
         throw new Error('Please fill in all required fields');
       }
 
-      const startup = {
-        id: `startup_${Date.now()}`,
-        ...startupFormData,
-        rating: 4.0 + Math.random() * 1,
-        createdAt: new Date().toISOString(),
-        profileViews: 0,
-        projectsSubmitted: startupFormData.projects.length,
-        completedProjects: 0,
-        averageRating: 0,
-        totalRatings: 0
+      // Create auth user
+      const { data: authData, error: authError } = await signUp(
+        startupFormData.contact.email,
+        'temp_password_123', // You might want to add a password field
+        { user_type: 'startup' }
+      );
+
+      if (authError) {
+        throw authError;
+      }
+
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Create startup profile
+      const startupData = {
+        user_id: authData.user.id,
+        name: startupFormData.name,
+        description: startupFormData.description,
+        industry: startupFormData.industry,
+        location: startupFormData.location,
+        website: startupFormData.website,
+        contact_email: startupFormData.contact.email,
+        contact_phone: startupFormData.contact.phone,
+        team_members: startupFormData.teamMembers,
+        projects: startupFormData.projects,
+        tags: startupFormData.tags,
+        funding_stage: startupFormData.fundingStage,
+        team_size: startupFormData.teamSize,
+        founded_year: startupFormData.foundedYear,
+        rating: 4.0 + Math.random() * 1
       };
 
-      const existingStartups = JSON.parse(localStorage.getItem('startups') || '[]');
-      existingStartups.push(startup);
-      localStorage.setItem('startups', JSON.stringify(existingStartups));
+      const { error: dbError } = await db.startups.create(startupData);
 
-      const startupAuth = {
-        email: startupFormData.contact.email,
-        startupId: startup.id,
-        isAuthenticated: true
-      };
-      
-      localStorage.setItem('startupAuth', JSON.stringify(startupAuth));
-      localStorage.setItem('startupData', JSON.stringify(startup));
+      if (dbError) {
+        throw dbError;
+      }
 
       toast({
         title: "Registration successful!",
@@ -240,31 +234,41 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      if (!enterpriseFormData.email || !enterpriseFormData.password || !enterpriseFormData.companyName || !enterpriseFormData.contactPerson) {
+      if (!enterpriseFormData.companyName || !enterpriseFormData.contactPerson || !loginData.email) {
         throw new Error('Please fill in all required fields');
       }
 
-      const enterprise = {
-        id: `enterprise_${Date.now()}`,
-        ...enterpriseFormData,
-        createdAt: new Date().toISOString(),
-        projectRequests: [],
-        activeProjects: [],
-        completedProjects: []
+      // Create auth user
+      const { data: authData, error: authError } = await signUp(
+        loginData.email,
+        loginData.password,
+        { user_type: 'enterprise' }
+      );
+
+      if (authError) {
+        throw authError;
+      }
+
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Create enterprise profile
+      const enterpriseData = {
+        user_id: authData.user.id,
+        company_name: enterpriseFormData.companyName,
+        contact_person: enterpriseFormData.contactPerson,
+        email: loginData.email,
+        industry: enterpriseFormData.industry,
+        company_size: enterpriseFormData.companySize,
+        location: enterpriseFormData.location
       };
 
-      const existingEnterprises = JSON.parse(localStorage.getItem('enterprises') || '[]');
-      existingEnterprises.push(enterprise);
-      localStorage.setItem('enterprises', JSON.stringify(existingEnterprises));
+      const { error: dbError } = await db.enterprises.create(enterpriseData);
 
-      const enterpriseAuth = {
-        email: enterpriseFormData.email,
-        enterpriseId: enterprise.id,
-        isAuthenticated: true
-      };
-      
-      localStorage.setItem('enterpriseAuth', JSON.stringify(enterpriseAuth));
-      localStorage.setItem('enterpriseData', JSON.stringify(enterprise));
+      if (dbError) {
+        throw dbError;
+      }
 
       toast({
         title: "Registration successful!",
@@ -371,6 +375,14 @@ export default function Auth() {
       tags: prev.tags.filter((_, i) => i !== index)
     }));
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black py-8 px-4">
@@ -602,194 +614,6 @@ export default function Auth() {
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <Label htmlFor="password" className="text-white">Password *</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={startupFormData.password}
-                      onChange={(e) => setStartupFormData(prev => ({ ...prev, password: e.target.value }))}
-                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
-                      placeholder="Create a secure password"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Team Members */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold text-white">Team Members</h3>
-                    <Button type="button" onClick={addTeamMember} variant="outline" size="sm" className="border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Member
-                    </Button>
-                  </div>
-                  
-                  {startupFormData.teamMembers.map((member, index) => (
-                    <div key={index} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-900 rounded-lg border border-gray-700">
-                      <Input
-                        value={member.name}
-                        onChange={(e) => updateTeamMember(index, 'name', e.target.value)}
-                        className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                        placeholder="Name"
-                      />
-                      <Input
-                        value={member.role}
-                        onChange={(e) => updateTeamMember(index, 'role', e.target.value)}
-                        className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                        placeholder="Role"
-                      />
-                      <Input
-                        value={member.email}
-                        onChange={(e) => updateTeamMember(index, 'email', e.target.value)}
-                        className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                        placeholder="Email"
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => removeTeamMember(index)}
-                        variant="outline"
-                        size="sm"
-                        className="border-red-600 text-red-400 hover:bg-red-900/20"
-                        disabled={startupFormData.teamMembers.length === 1}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Projects */}
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold text-white">Projects</h3>
-                    <Button type="button" onClick={addProject} variant="outline" size="sm" className="border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Project
-                    </Button>
-                  </div>
-                  
-                  {startupFormData.projects.map((project, index) => (
-                    <div key={index} className="p-4 bg-gray-900 rounded-lg border border-gray-700 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-white font-medium">Project {index + 1}</h4>
-                        <Button
-                          type="button"
-                          onClick={() => removeProject(index)}
-                          variant="outline"
-                          size="sm"
-                          className="border-red-600 text-red-400 hover:bg-red-900/20"
-                          disabled={startupFormData.projects.length === 1}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                          value={project.name}
-                          onChange={(e) => updateProject(index, 'name', e.target.value)}
-                          className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                          placeholder="Project name"
-                        />
-                        <div className="flex gap-2">
-                          <Input
-                            value={newTech}
-                            onChange={(e) => setNewTech(e.target.value)}
-                            className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                            placeholder="Add technology"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                e.preventDefault();
-                                addTechnology(index);
-                              }
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            onClick={() => addTechnology(index)}
-                            variant="outline"
-                            size="sm"
-                            className="border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800 shrink-0"
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <Textarea
-                        value={project.description}
-                        onChange={(e) => updateProject(index, 'description', e.target.value)}
-                        className="bg-gray-800 border-gray-600 text-white placeholder:text-gray-500"
-                        placeholder="Project description"
-                        rows={3}
-                      />
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {project.technologies.map((tech, techIndex) => (
-                          <Badge key={techIndex} variant="secondary" className="bg-gray-700 text-gray-300 border-gray-600">
-                            {tech}
-                            <Button
-                              type="button"
-                              onClick={() => removeTechnology(index, techIndex)}
-                              variant="ghost"
-                              size="sm"
-                              className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tags */}
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-white">Tags</h3>
-                  
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
-                      placeholder="Add a tag (e.g., AI, automation, SaaS)"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addTag();
-                        }
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      onClick={addTag}
-                      variant="outline"
-                      className="border-gray-700 text-gray-400 hover:text-white hover:bg-gray-800 shrink-0"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {startupFormData.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="bg-gray-700 text-gray-300 border-gray-600">
-                        {tag}
-                        <Button
-                          type="button"
-                          onClick={() => removeTag(index)}
-                          variant="ghost"
-                          size="sm"
-                          className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
                 </div>
 
                 {/* Additional Details */}
@@ -881,8 +705,8 @@ export default function Auth() {
                     <Input
                       id="email"
                       type="email"
-                      value={enterpriseFormData.email}
-                      onChange={(e) => setEnterpriseFormData(prev => ({ ...prev, email: e.target.value }))}
+                      value={loginData.email}
+                      onChange={(e) => setLoginData(prev => ({ ...prev, email: e.target.value }))}
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                       placeholder="enterprise@company.com"
                       required
@@ -894,8 +718,8 @@ export default function Auth() {
                     <Input
                       id="password"
                       type="password"
-                      value={enterpriseFormData.password}
-                      onChange={(e) => setEnterpriseFormData(prev => ({ ...prev, password: e.target.value }))}
+                      value={loginData.password}
+                      onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                       placeholder="Your password"
                       required
